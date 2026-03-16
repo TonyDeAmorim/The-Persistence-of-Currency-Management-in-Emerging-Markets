@@ -1,0 +1,578 @@
+---
+title: "Learning to Float ? The Persistence of Currency Management in Emerging Markets"
+subtitle: "A Modern Perspective on Calvo and Reinhart (2002)"
+author:
+  - name: |
+      Tony De Amorim \tabularnewline
+      \small Paris-Dauphine University, PSL \tabularnewline
+      \small \href{mailto:tony.de-amorim@dauphine.eu}{Contact} -- \href{https://github.com/TonyDeAmorim}{GitHub} -- \href{www.linkedin.com/in/tony-de-amorim-756818257}{LinkedIn} 
+
+date: last-modified
+date-format: "MMMM YYYY"
+abstract: |
+  This essay investigates the modern persistence of "Fear of Floating" in Emerging Countries. The goal is to replicate the framework of Calvo and Reinhart (2002) and apply it to contemporary data while extending the original methodology. By endogenizing a new variability threshold of 2.13% based on current benchmark currencies, the study reveals that many EMEs still stabilize their exchange rates far beyond the behavior of pure floaters. While not structured as a formal working paper, this essay employs graphical representations and concise analytical frameworks to render complex macroeconomic concepts accessible to a broader audience.
+keywords: [Fear of Floating, Exchange Rate Regimes, Global Financial Cycle, Emerging Markets]
+format:
+  pdf:
+    geometry:
+      - left=25mm
+      - right=25mm
+      - top=30mm
+      - bottom=30mm
+    papersize: a4
+    number-sections: true
+    fig-pos: 'H'
+    fontsize: 11pt
+    interlinespacing: 1.2
+    indent: true
+bibliography: Refferences.bib
+csl: apa.csl
+---
+
+\newpage
+
+```{r}
+#| label: library import
+#| echo: false
+#| message: false
+#| warning: false
+
+library(ggplot2)
+library(ggthemes)
+library(tidyverse)
+library(readr)
+library(yfR)
+library(wbstats)
+library(priceR)
+library(patchwork)
+library(olsrr)
+library(yfR)
+library(zoo)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(gt)
+library(countrycode)
+library(readxl)
+```
+
+```{r}
+#| label: Import for devise function
+#| echo: false
+#| message: false
+#| warning: false
+
+
+Import_DEV <- function(DEV) {
+  Ticker <- str_c(DEV, "=X")
+
+  df <- yf_get(
+    tickers = Ticker,
+    first_date = "2010-01-01",
+    last_date = "2018-01-01",
+    thresh_bad_data = 0
+  )
+
+  df <- df |>
+    select(ref_date, price_close) |>
+    mutate(month = floor_date(ref_date, "month")) |>
+    group_by(month) |>
+    slice_tail(n = 1) |>
+    ungroup() |>
+    mutate(
+      diff_price = ((price_close - lag(price_close)) / lag(price_close)) * 100,
+      country = str_c("USD_", DEV)
+    ) |>
+    filter(!is.na(diff_price)) |>
+    select(month, country, diff_price)
+
+  return(df)
+}
+```
+
+```{r}
+#| label: Var plot dev function
+#| echo: false
+#| message: false
+#| warning: false
+
+Var_Plot_DEV <- function(df, name, tr) {
+  ggplot(df, aes(x = month, y = .data[[name]])) +
+    geom_line() +
+    geom_hline(yintercept = tr, linetype = "dashed", color = "red", alpha = 0.6) +
+    geom_hline(yintercept = -tr, linetype = "dashed", color = "red", alpha = 0.6) +
+    theme_bw(base_size = 8) +
+    labs(
+      title =  name,
+      y = "Variation (%)",
+      x = "Date"
+    )
+}
+```
+
+# Introduction
+
+
+Consistent with the work of @calvo2002fear, this short essay examines whether Emerging Market Economies (EMEs)[^1] continue to demonstrate a "Fear of Floating" within a contemporary setting. Specifically, it analyzes the propensity of these nations to stabilize their exchange rates through *de facto* management to mitigate adverse macroeconomic consequences. While not structured as a formal working paper, this work employs graphical representations and a concise analytical framework to render complex economic concepts accessible to a broader audience.
+
+In the original literature, *Fear of Floating* is defined as a phenomenon where EMEs, despite officially adopting flexible exchange rate regimes, remain highly sensitive to currency fluctuations due to concerns regarding dollar-denominated debt and inflationary pressures. Given that the foundational research by @calvo2002fear predates the long-term structural shifts following the 2008 Global Financial Crisis, including the rise of the Global Financial Cycle and periods of extreme capital flow volatility, the persistence of such behavior in the subsequent decade remains a critical empirical question. By benchmarking a panel of EMEs against major free-floating currencies during the 2010-2018 period, this study replicates and extends the original methodology to compare declared exchange regimes against realized market volatility.
+
+The structure of this essay is as follows: Section 2 details the identification of exchange rate regimes and the construction of the sample. Section 3 explains the methodology used to endogenize a modern variation threshold of 2.13%. Section 4 applies this framework to EMEs to evaluate the persistence of Fear of Floating relative to historical benchmarks. Finally, Section 5 contextualizes these findings within modern theoretical frameworks, such as the Global Financial Cycle, and offers concluding remarks.
+
+# Methodology and Sample Selection
+
+This section details the construction of the study sample, which was developed by cross-referencing the foundational country list from @calvo2002fear with the IMF’s Annual Report on Exchange Arrangements and Exchange Restrictions (@imf2024areaer) database. To capture a contemporary perspective, we selected economies that maintained a de facto classification of either "floating"[^2] or "free floating"[^3] for a minimum of seven consecutive eight between 2008 and 2023. This dual-category approach is essential for distinguishing between advanced economies characterized by minimal intervention and emerging markets that may exhibit managed variability. The final sample and their respective classification periods are detailed in @tbl-Exchange-Rates-Regime.
+
+Advanced economies, including the United Kingdom, Canada, and the Euro Area, consistently maintain "Free Floating" status, serving as a control group for "pure" exchange rate flexibility. Conversely, the "Floating" category is dominated by Emerging Market Economies (EMEs) such as Brazil, India, and Peru. While these nations officially allow the market to determine the exchange rate, they reserve the right to intervene to smooth the variability of their exchange rate. Consequently, this group is where we expect to find the most salient evidence of "Fear of Floating". To ensure data consistency and avoid the structural noise introduced by the COVID-19 pandemic, we focus our analysis on the 2010–2018 period, where data is most uniformly available.
+
+```{r}
+#| label: tbl-Exchange-Rates-Regime
+#| tbl-cap: "Period of floating for studied countries"
+#| echo: false
+#| message: false
+#| warning: false
+
+exchange_regime <-
+  read_delim("Ressources/exchange_regime.csv",
+    delim = ";", escape_double = FALSE, trim_ws = TRUE
+  )
+
+exchange_regime <- bind_rows(
+  exchange_regime |>
+    select(Country = 1, Period = 2) |>
+    mutate(Regime = "Free Floating"),
+  exchange_regime |>
+    select(Country = 3, Period = 4) |>
+    mutate(Regime = "Floating")
+) |>
+  filter(!is.na(Country))
+
+n <- nrow(exchange_regime)
+mid <- ceiling(n / 2)
+
+partie1 <- exchange_regime[1:mid, ]
+partie2 <- exchange_regime[(mid + 1):n, ]
+
+if (nrow(partie2) < nrow(partie1)) {
+  partie2 <- bind_rows(partie2, tibble(Country = "", Period = "", Regime = ""))
+}
+
+table_display <- bind_cols(partie1, partie2)
+
+table_display |>
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    col.names = c("Country", "Period", "Regime", "Country", "Period", "Regime"),
+    align = "l"
+  ) |>
+  kable_styling(
+    latex_options = c("hold_position"),
+    font_size = 8
+  ) |>
+  add_header_above(c(" " = 3, " " = 3), line = FALSE) |>
+  column_spec(3, width = "3cm") |>
+  column_spec(4, width = "3cm")
+```
+
+# Endogenizing the Variability Threshold
+
+```{r}
+#| label: Importing Benchmark data
+#| echo: false
+#| message: false
+#| warning: false
+
+Benchmark <- c("JPY", "EUR", "GBP", "AUD")
+
+Benchmark_df <- map(Benchmark, Import_DEV) |>
+  list_rbind() |>
+  pivot_wider(names_from = country, values_from = diff_price)
+```
+
+```{r}
+#| label: Computing new threshold
+#| echo: false
+#| message: false
+#| warning: false
+
+target_probs <- c(0.55, 0.60, 0.65)
+
+threshold_comparison <- map_dfr(target_probs, function(p) {
+  tr_value <- Benchmark_df |>
+    pivot_longer(cols = starts_with("USD_"), names_to = "currency", values_to = "variation") |>
+    group_by(currency) |>
+    summarise(indiv_tr = quantile(abs(variation), probs = p, na.rm = TRUE)) |>
+    summarise(mean_tr = mean(indiv_tr)) |>
+    pull(mean_tr)
+  tibble(target_percent = p * 100, threshold_obtained = round(tr_value, 2))
+})
+
+threshold_comparison <- threshold_comparison |>
+  add_row(target_percent = 60, threshold_obtained = 2.50) |>
+  mutate(label = ifelse(threshold_obtained == 2.50, "Original (2002)", "Modern (Endogenous)"))
+
+```
+
+
+In their seminal work, Calvo and Reinhart (2002) utilized a fixed 2.5% threshold to evaluate the exchange rate stability of benchmark economies (specifically the G3 and Australia) relative to EMEs. By calculating the frequency of monthly fluctuations within this band, they identified significant disparities. Their findings revealed that many self-declared floaters exhibited remarkably low exchange rate variance. However, given the structural shifts in global financial markets over the last two decades, a static 2.5% band may no longer accurately define the modern standard for currency flexibility. Consequently, this essay adopts an empirical strategy to endogenize the threshold based on contemporary data. Taking the historical findings as a baseline (where benchmark floaters exhibited a 60% probability of remaining within the 2.5% band), we reverse engineer this logic. We determine the specific threshold that replicates this 60% probability for each of our modern benchmark group and then take the average, thereby establishing a data-driven flexibility benchmark to which the EMEs in our sample can be compared. We thus seek to identify a new threshold $x$ such that:
+$$
+P(|\Delta e _{it}|<x)= 0.60
+$$ {#eq-Prob}
+
+Where $e_{it}$ represents the exchange rate of country $i$ against the USD at time $t$. We apply this method to two of the original currencies, the Japanese Yen (JPY) and the Australian Dollar (AUD). We substituted the German Deutsche Mark with the Euro (EUR) and incorporated the British Pound (GBP), which is widely considered a robust free-floating currency. Daily data from Yahoo Finance were aggregated into monthly iterations using the end-of-period value. The use of end-of-period values is preferred over monthly averages to ensure that the exchange rate reflects a market spot price at a specific point in time, rather than a smoothed aggregate. This choice is methodologically consistent with the framework used in Calvo and Reinhart (2002), which evaluates the variability of "stock" variables. By using EOP data, the relative variations $\Delta_{e_{it}}$ in @eq-Variations represent the actual price movement between two discrete points, capturing the full extent of market shocks that occur at the end of the month which might otherwise be masked by the arithmetic mean of a period average. To compute the variations, we follow the framework of the original work by using the absolute value of monthly changes:
+$$
+\Delta_{e_{it}} = \frac{e_{it} - e_{it-1}}{e_{it-1}} \cdot 100
+$$ {#eq-Variations}
+
+This metric captures the discrete relative variation of the exchange rate, serving as a proxy for financial stress. Higher percentage changes reflect increased exchange rate variability. While volatility is statistically measured as the dispersion of returns over time, $\Delta_{e_{it}}$ serve as a direct proxy for financial stress. By focusing on the magnitude of these discrete movements, we can identify episodes where the exchange rate deviates significantly from its previous level, signaling potential market instability. Furthermore, by focusing on relative rather than absolute changes, this measure ensures comparability across different currency pairs regardless of their nominal price levels. After using our method and using the 60% probability as a first estimate, we obtain a 2.13% threshold and represented it for our benchmark on @fig-Benchmark-variation.
+
+```{r}
+#| label: fig-Benchmark-variation
+#| fig-cap: "Benchmark Currencies Volatility Analysis"
+#| echo: false
+#| message: false
+#| warning: false
+
+
+
+currencies <- c("USD_JPY", "USD_EUR", "USD_GBP", "USD_AUD")
+
+Bch_plots <- lapply(currencies, function(x) Var_Plot_DEV(Benchmark_df, x, 2.13))
+
+wrap_plots(Bch_plots, ncol = 2) +
+  plot_annotation(
+    caption = "Threshold of 2.13% derived from the 60% quantile of observations
+    Source: Yahoo Finance data aggregated by author",
+    theme = theme(
+      plot.caption = element_text(size = 6)
+    )
+  )
+```
+
+# Empirical Analysis: Measuring Fear of Floating in EMEs
+
+```{r}
+#| label: Importing EMEs free floaters data
+#| echo: false
+#| message: false
+#| warning: false
+
+EMEs_FF <- c("CAD", "CLP", "IDR", "MXN", "NOK", "SEK")
+
+EMEs_FF_df <- map(EMEs_FF, Import_DEV) |>
+  list_rbind() |>
+  pivot_wider(names_from = country, values_from = diff_price)
+```
+
+```{r}
+#| label: Importing EMEs floaters data
+#| echo: false
+#| message: false
+#| warning: false
+
+EMEs_FL <- c("BRL", "COP", "INR", "ILS", "KES", "MYR", "NZD", "PEN", "PHP", "ZAR", "KRW", "UGX", "UYU")
+
+EMEs_FL_df <- map(EMEs_FL, Import_DEV) |>
+  list_rbind() |>
+  pivot_wider(names_from = country, values_from = diff_price)
+```
+
+```{r}
+#| label: Computing probabilities for free floaters
+#| echo: false
+#| message: false
+#| warning: false
+
+
+thresholds <-
+  threshold_comparison |>
+  pull(threshold_obtained)
+
+names(thresholds) <- paste0("tr_", threshold_comparison$target_percent)
+
+FF_stability_multi <- EMEs_FF_df |>
+  pivot_longer(
+    cols = starts_with("USD_"),
+    names_to = "country",
+    values_to = "variation"
+  ) |>
+  mutate(
+    p_55 = abs(variation) < thresholds["tr_55"],
+    p_60 = abs(variation) < thresholds["tr_60"],
+    p_65 = abs(variation) < thresholds["tr_65"],
+    p_ORG = abs(variation) < 2.5
+  ) |>
+  group_by(country) |>
+  summarise(
+    across(starts_with("p_"), ~ round(mean(.x, na.rm = TRUE) * 100, 2))
+  ) |>
+  arrange(desc(p_60))
+```
+
+```{r}
+#| label: Computing probabilities for floaters
+#| echo: false
+#| message: false
+#| warning: false
+
+
+FL_stability_multi <- EMEs_FL_df |>
+  pivot_longer(
+    cols = starts_with("USD_"),
+    names_to = "country",
+    values_to = "variation"
+  ) |>
+  mutate(
+    p_55 = abs(variation) < thresholds["tr_55"],
+    p_60 = abs(variation) < thresholds["tr_60"],
+    p_65 = abs(variation) < thresholds["tr_65"],
+    p_ORG = abs(variation) < 2.5
+  ) |>
+  group_by(country) |>
+  summarise(
+    across(starts_with("p_"), ~ round(mean(.x, na.rm = TRUE) * 100, 2))
+  ) |>
+  arrange(desc(p_60))
+```
+
+```{r}
+#| label: Computing probabilities for benchmark
+#| echo: false
+#| message: false
+#| warning: false
+
+
+Benchmark_stability_multi <- Benchmark_df |>
+  pivot_longer(
+    cols = starts_with("USD_"),
+    names_to = "country",
+    values_to = "variation"
+  ) |>
+  mutate(
+    p_55 = abs(variation) < thresholds["tr_55"],
+    p_60 = abs(variation) < thresholds["tr_60"],
+    p_65 = abs(variation) < thresholds["tr_65"],
+    p_ORG = abs(variation) < 2.5
+  ) |>
+  group_by(country) |>
+  summarise(
+    across(starts_with("p_"), ~ round(mean(.x, na.rm = TRUE) * 100, 2))
+  ) |>
+  arrange(desc(p_60))
+```
+
+We apply our baseline threshold of 2.13% to the Emerging Market Economies (EMEs). The graphical representations for both floaters and free floaters, provided in the [Appendix](#sec-one), reveal highly heterogeneous patterns of variation. The core objective of this analysis is to compute the probability of each EME remaining within this 2.13% band to allow for a direct comparison with the original findings of Calvo and Reinhart (2002).The selection of the 55% and 65% quantiles provides a symmetrical ±5% interval around our primary 60% baseline, allowing for a rigorous sensitivity test of the results. This approach establishes a variability gradient that captures the persistence of stability patterns across varying degrees of strictness. While the 55% quantile (1.80%) imposes a highly restrictive definition to test the most intense instances of currency management, the 65% quantile (2.33%) ensures the findings remain consistent as the threshold approaches the historical 2.50% mark. By demonstrating that the divergence between Benchmarks and Floaters holds across this range, we confirm that our observations reflect a structural policy stance rather than a specific artifact of the primary threshold. Finally, we include the original 2.5% band as a historical reference. Our results are detailed in @tbl-Probability-calcul. 
+
+Our findings indicate that Free Floaters maintain results largely consistent with the Benchmark group across all specifications. However, they systematically display lower average variability, suggesting a latent tendency toward exchange rate management despite their official status. In contrast, the Floaters group exhibits significant heterogeneity. Such dispersion is expected, as country-specific factors heavily influence individual exchange rate dynamics. On one hand, the 'Rigid Anchor' profile (Kenya, Philippines) maintains stability levels that surpass even the most stable Benchmarks, hinting at a structural *Fear of Floating*. On the other hand, the 'Progressive Flexibility' profile (Mexico, Chile) demonstrates that certain EMEs have successfully integrated exchange rate variability as a functional economic tool. This divergence suggests that the decision to manage a currency is less about the official regime and more about specific domestic vulnerabilities, such as high pass-through to inflation or external debt levels.
+
+
+```{r}
+#| label: tbl-Probability-calcul
+#| tbl-cap: "Volatility of Exchange Rates in Different Regimes"
+#| echo: false
+#| message: false
+#| warning: false
+
+custom_names <- c(
+  "GBP" = "United Kingdom",
+  "JPY" = "Japan",
+  "EUR" = "Euro Area",
+  "AUD" = "Australia",
+  "IDR" = "Indonesia",
+  "CAD" = "Canada",
+  "MXN" = "Mexico",
+  "SEK" = "Sweden",
+  "CLP" = "Chile",
+  "NOK" = "Norway",
+  "KES" = "Kenya",
+  "PHP" = "Philippines",
+  "PEN" = "Peru",
+  "UGX" = "Uganda",
+  "INR" = "India",
+  "UYU" = "Uruguay",
+  "ILS" = "Israel",
+  "MYR" = "Malaysia",
+  "KRW" = "South Korea",
+  "COP" = "Colombia",
+  "NZD" = "New Zealand",
+  "BRL" = "Brazil",
+  "ZAR" = "South Africa"
+)
+
+all_results <- bind_rows(
+  Benchmark_stability_multi |> mutate(group = "Benchmark"),
+  FF_stability_multi |> mutate(group = "Free Floaters"),
+  FL_stability_multi |> mutate(group = "Floaters")
+) |>
+  mutate(
+    curr_code = str_extract(country, "[A-Z]{3}$"),
+    country_name = recode(curr_code, !!!custom_names)
+  ) |>
+  arrange(group, desc(p_60))
+
+
+all_results <- all_results |>
+  mutate(group = factor(group, levels = c("Benchmark", "Floaters", "Free Floaters"))) |>
+  arrange(group, country)
+
+group_counts <- all_results |> count(group)
+tab_final <- all_results |>
+  select(Country = country_name, p_55, p_60, p_65, p_ORG) |>
+  mutate(across(starts_with("p_"), ~ sprintf("%.1f", .)))
+
+tab_final |>
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    col.names = c("Country", "Within ±1.80% band", "Within ±2.13% band", 
+                  "Within ±2.33% band", "Within ±2.50% band"),
+    align = "lcccc"
+  ) |>
+  kable_styling(
+    latex_options = c("H"),
+    font_size = 10
+  ) |>
+  pack_rows("Benchmark", 1, group_counts$n[1], indent = FALSE, bold = TRUE) |>
+  pack_rows("Floaters", group_counts$n[1] + 1, group_counts$n[1] + group_counts$n[2], 
+            indent = FALSE, bold = TRUE) |>
+  pack_rows("Free Floaters", sum(group_counts$n[1:2]) + 1, nrow(tab_final), 
+            indent = FALSE, bold = TRUE) |>
+  add_header_above(c(" " = 1, "Probability that the monthly change is:" = 4), bold = TRUE) |>
+  footnote(
+  general = "Note: Data 2010-2019. Thresholds are endogenously determined. 2.50% is the Calvo-Reinhart (2002) reference.",
+  general_title = "",
+  footnote_as_chunk = TRUE,
+  threeparttable = TRUE
+)
+```
+
+
+# Revisiting the Trilemma through the Global Financial Cycle
+
+The empirical results must be interpreted within the evolving framework of international macroeconomics. While the classical Impossible Trinity of @mundell1963capital suggests that flexible exchange rates grant monetary independence under free capital movement, recent literature on the Global Financial Cycle challenges this view. @rey2015dilemma argues that the international system faces a dilemma rather than a trilemma, as exchange rate flexibility fails to provide autonomy when global credit conditions and capital flows are driven by a single global factor. Closely tied to the US monetary policy stance and global risk aversion, this factor creates a significant constraint for EMEs. As @miranda2020us demonstrates, the US dollar acts as the primary engine for this cycle, exposing even floating regimes to imported volatility regardless of their domestic fundamentals. 
+
+This theoretical shift provides the crucial context for the results in @tbl-Comp-calcul, which compares contemporary stability probabilities at the 2.5% threshold with the original findings of @calvo2002fear. The systematic decrease in stability across all groups confirms that the modern financial environment is inherently more volatile than in the early 2000s. While every category exhibits increased variability, the shift is most pronounced for currencies that transitioned to or maintained a free-floating regime. Conversely, countries moving toward managed arrangements experienced the least severe declines, reflecting deliberate policy efforts to dampen the fluctuations driven by this global cycle.
+
+```{r}
+#| label: tbl-Comp-calcul
+#| tbl-cap: "Stability Variations by Regime Transition (Threshold: 2.5%)"
+#| echo: false
+#| message: false
+#| warning: false
+Comparison_table <- read_excel("Ressources/Comparison_table.xlsx")
+
+transition_summary <- Comparison_table |>
+  filter(!Country %in% c("Australia", "Japan")) |>
+  mutate(
+    Exchange_rate_2002 = as.numeric(Exchange_rate_2002),
+    Exchange_rate_2010_19 = as.numeric(Exchange_rate_2010_19)
+  ) |>
+  mutate(
+    Transition = case_when(
+      Regime_2002 == "FF" & Regime_2010_19 == "FF" ~ "Stay FF",
+      Regime_2002 == "FL" & Regime_2010_19 == "FL" ~ "Stay FL",
+      Regime_2002 == "FL" & Regime_2010_19 == "FF" ~ "Become FF",
+      Regime_2002 == "FF" & Regime_2010_19 == "FL" ~ "Become FL"
+    ),
+    Variation = Exchange_rate_2010_19 - Exchange_rate_2002
+  ) |>
+  group_by(Transition) |>
+  summarise(
+    n = n(),
+    Countries = paste(Country, collapse = ", "),
+    Mean_2002 = mean(Exchange_rate_2002, na.rm = TRUE),
+    Mean_2010_19 = mean(Exchange_rate_2010_19, na.rm = TRUE),
+    Avg_Change = mean(Variation, na.rm = TRUE)
+  ) |>
+  arrange(Avg_Change)
+
+transition_summary |>
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    col.names = c("Transition", "N", "Countries", "Mean 2002", "Mean 2010-19", "Change"),
+    digits = 1
+  ) |>
+  kable_styling(latex_options = c("hold_position", "scale_down")) |>
+  column_spec(3, width = "6cm") |>
+  column_spec(6, bold = TRUE) |>
+  footnote(
+    general = "Note: FF and FL denotes 'Free Floating' and 'Floating' respectively, 'Become FF' and 'Become FL' highlights countries moving that switched between 'Free Floating' and 'Floating' regimes (and inversly) between the two studies.",
+    general_title = "",
+    threeparttable = TRUE,
+    fixed_small_size = 2.5
+  )
+
+```
+
+The limitations of a fixed 2.5% threshold are particularly evident when considering the heightened sensitivity of EMEs to external shocks. As @arora2001how demonstrated, changes in U.S. monetary policy transmit directly to emerging markets through sovereign spreads, creating a financial vulnerability that persists regardless of the official exchange rate regime. Given that dependency on dollar-denominated debt remains pervasive, the baseline volatility of the global economy has shifted significantly since the early 2000s. Consequently, relying on a static 2.5% benchmark fails to account for these structural changes and the increased sophistication of modern currency management. By endogenizing our thresholds at 2.13%, we move away from an arbitrary historical figure to define *Fear of Floating* relative to contemporary market conditions. This approach ensures that our results capture the actual policy intent of central banks rather than simply measuring their distance from an outdated international norm. 
+
+These tighter bands provide a more nuanced detection of currency management, as shown in @tbl-Probability-calcul. A striking divergence emerges: while benchmark currencies see their stability probabilities drop sharply as the threshold narrows, a subset of floaters, most notably Kenya and the Philippines, maintain remarkably high stability. This suggests that these central banks are not merely preventing extreme devaluations but are actively smoothing even minor fluctuations. By defining *Fear of Floating* relative to the actual behavior of pure floaters in the contemporary era, we highlight that the intensity of currency management in certain EMEs is significantly higher than a static historical reference would suggest. 
+
+# Concluding Remarks
+
+The findings of this study suggest that *Fear of Floating* may still be a significant factor in the modern international monetary system, though its drivers appear increasingly complex. By endogenizing the variation threshold to 2.13%, this analysis reveals that while global volatility has increased, several EMEs continue to maintain stability levels that diverge from the behavior of pure floaters. The results identify a notable distinction between "Rigid Anchors," such as Kenya and the Philippines, and "Progressive Flexibles," such as Mexico and Chile. These patterns invite further investigation into the shift from a traditional trilemma to a monetary dilemma, where the Global Financial Cycle and US dollar dominance potentially constrain domestic autonomy regardless of the official regime. Ultimately, this evidence suggests that contemporary currency management is influenced less by official labels and more by structural vulnerabilities and the perceived necessity to mitigate imported shocks.
+
+However, these results should be interpreted as a preliminary framework rather than a definitive classification, as several factors may bias the observations. The reliance on the 2010 to 2018 window ensures data consistency but omits the unprecedented volatility of the post-pandemic era. Furthermore, while the discrete variation of the exchange rate serves as a useful proxy, it does not explicitly disentangle market-driven movements from active policy intervention. The omission of foreign exchange reserve data and interest rate volatility remains a significant limitation, as these instruments are critical components of the EME policy toolkit. These constraints invite a more granular research agenda that incorporates central bank interventions to better differentiate intentional policy smoothing from the passive consequences of global financial conditions.
+
+
+\newpage
+
+# Appendix : Variations Plots {#sec-one -}
+
+```{r}
+#| label: fig-EMEs_FL-variation
+#| fig-cap: "EMEs Floaters Currencies Volatility Analysis"
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 12
+#| fig-height: 9
+#| out-width: "90%"
+
+floaters <- c("USD_BRL", "USD_COP", "USD_INR", "USD_ILS", "USD_KES", "USD_KRW", "USD_MYR", "USD_NZD", "USD_PEN", "USD_PHP", "USD_ZAR", "USD_UGX", "USD_UYU")
+
+FL_plots <- lapply(floaters, function(x) Var_Plot_DEV(EMEs_FL_df, x, 2.13))
+
+wrap_plots(FL_plots, ncol = 4) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    caption = "Threshold of 2.13% derived from the 60% quantile of observations\nSource: Yahoo Finance data aggregated by author",
+    theme = theme(plot.caption = element_text(size = 6))
+  ) &
+  theme(axis.title = element_blank())
+```
+ 
+```{r}
+#| label: fig-EMEs_FF-variation
+#| fig-cap: "EMEs Free Floaters Currencies Volatility Analysis"
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 10
+#| fig-height: 7
+#| out-width: "90%"
+
+
+free_floaters <- c("USD_CAD", "USD_CLP", "USD_IDR", "USD_MXN", "USD_NOK", "USD_SEK")
+
+FF_plots <- lapply(free_floaters, function(x) Var_Plot_DEV(EMEs_FF_df, x, 2.13))
+
+wrap_plots(FF_plots, ncol = 2) +
+  plot_annotation(
+    caption = "Threshold of 2.13% derived from the 60% quantile of observations
+    Source: Yahoo Finance data aggregated by author",
+    theme = theme(
+      plot.caption = element_text(size = 6)
+    )
+  )
+```
+
+# Bibliography
+
+[^1]: Let us borrow here the wording used in @ahmed2022monetary, which is useful in both its simplicity and clarity.
+
+[^2]: An exchange rate is classified as floating if the rate is largely market-determined, without an ascertainable or announced path, but where the authorities may intervene to smooth fluctuations and prevent undue volatility.
+
+[^3]: An exchange rate is classified as free floating if the intervention occurs only exceptionally and aims to address systemic risks or disorderly market conditions.
