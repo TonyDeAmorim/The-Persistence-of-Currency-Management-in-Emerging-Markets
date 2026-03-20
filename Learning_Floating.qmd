@@ -5,15 +5,19 @@ author:
   - name: |
       Tony De Amorim \tabularnewline
       \small Paris-Dauphine University, PSL \tabularnewline
-      \small \href{mailto:tony.de-amorim@dauphine.eu}{Contact} -- \href{https://github.com/TonyDeAmorim}{GitHub} -- \href{www.linkedin.com/in/tony-de-amorim-756818257}{LinkedIn} 
+      \small \href{mailto:tony.de-amorim@dauphine.eu}{Contact} -- \href{https://github.com/TonyDeAmorim}{GitHub} -- \href{https://www.linkedin.com/in/tony-de-amorim-756818257}{LinkedIn}
 
 date: last-modified
 date-format: "MMMM YYYY"
 abstract: |
-  This essay investigates the modern persistence of "Fear of Floating" in Emerging Countries. The goal is to replicate the framework of Calvo and Reinhart (2002) and apply it to contemporary data while extending the original methodology. By endogenizing a new variability threshold of 2.13% based on current benchmark currencies, the study reveals that many EMEs still stabilize their exchange rates far beyond the behavior of pure floaters. While not structured as a formal working paper, this essay employs graphical representations and concise analytical frameworks to render complex macroeconomic concepts accessible to a broader audience.
+  This essay investigates the modern persistence of "Fear of Floating" in Emerging Countries. We aim at replicating the framework of Calvo and Reinhart (2002) and apply it to contemporary data while extending the original methodology. By endogenizing a new variability threshold of 2.13% based on current benchmark currencies, the study suggests that several EMEs continue to exhibit exchange rate stability patterns that diverge significantly from those of pure floaters. While not structured as a formal working paper, this essay employs graphical representations and concise analytical frameworks to render complex macroeconomic concepts accessible to a broader audience.
 keywords: [Fear of Floating, Exchange Rate Regimes, Global Financial Cycle, Emerging Markets]
 format:
   pdf:
+    include-in-header:
+      text: |
+        \usepackage{float}
+        \usepackage[section]{placeins}
     geometry:
       - left=25mm
       - right=25mm
@@ -29,7 +33,6 @@ bibliography: Refferences.bib
 csl: apa.csl
 ---
 
-\newpage
 
 ```{r}
 #| label: library import
@@ -110,10 +113,12 @@ Var_Plot_DEV <- function(df, name, tr) {
 }
 ```
 
+*Note : Throughout this essay, we will use the formulation used in @ahmed2022monetary, referring to developing countries as Emerging Market Economies (EMEs), as this wording is useful in both its simplicity and clarity.*
+
 # Introduction
 
 
-Consistent with the work of @calvo2002fear, this short essay examines whether Emerging Market Economies (EMEs)[^1] continue to demonstrate a "Fear of Floating" within a contemporary setting. Specifically, it analyzes the propensity of these nations to stabilize their exchange rates through *de facto* management to mitigate adverse macroeconomic consequences. While not structured as a formal working paper, this work employs graphical representations and a concise analytical framework to render complex economic concepts accessible to a broader audience.
+Consistent with the work of @calvo2002fear, this short essay examines whether Emerging Market Economies (EMEs) continue to demonstrate a "Fear of Floating" within a contemporary setting. Specifically, it analyzes the propensity of these nations to stabilize their exchange rates through *de facto* management to mitigate adverse macroeconomic consequences. Although this is not an official working paper, this essay uses visual representations and a concise analytical framework to present this relevant topic on an understandable basis.
 
 In the original literature, *Fear of Floating* is defined as a phenomenon where EMEs, despite officially adopting flexible exchange rate regimes, remain highly sensitive to currency fluctuations due to concerns regarding dollar-denominated debt and inflationary pressures. Given that the foundational research by @calvo2002fear predates the long-term structural shifts following the 2008 Global Financial Crisis, including the rise of the Global Financial Cycle and periods of extreme capital flow volatility, the persistence of such behavior in the subsequent decade remains a critical empirical question. By benchmarking a panel of EMEs against major free-floating currencies during the 2010-2018 period, this study replicates and extends the original methodology to compare declared exchange regimes against realized market volatility.
 
@@ -121,9 +126,14 @@ The structure of this essay is as follows: Section 2 details the identification 
 
 # Methodology and Sample Selection
 
-This section details the construction of the study sample, which was developed by cross-referencing the foundational country list from @calvo2002fear with the IMF’s Annual Report on Exchange Arrangements and Exchange Restrictions (@imf2024areaer) database. To capture a contemporary perspective, we selected economies that maintained a de facto classification of either "floating"[^2] or "free floating"[^3] for a minimum of seven consecutive eight between 2008 and 2023. This dual-category approach is essential for distinguishing between advanced economies characterized by minimal intervention and emerging markets that may exhibit managed variability. The final sample and their respective classification periods are detailed in @tbl-Exchange-Rates-Regime.
+This section details the construction of the study sample, which was developed by cross-referencing the foundational country list from @calvo2002fear with the IMF’s Annual Report on Exchange Arrangements and Exchange Restrictions (@imf2024areaer) database. To capture a contemporary perspective and avoid the structural noise introduced by the COVID-19 pandemic, we selected economies that maintained a de facto classification of either "floating" or "free floating" during at least 8 years between 2008 and 2023. These precise exchange rate regimes are officially defined as such by the IMF :
 
-Advanced economies, including the United Kingdom, Canada, and the Euro Area, consistently maintain "Free Floating" status, serving as a control group for "pure" exchange rate flexibility. Conversely, the "Floating" category is dominated by Emerging Market Economies (EMEs) such as Brazil, India, and Peru. While these nations officially allow the market to determine the exchange rate, they reserve the right to intervene to smooth the variability of their exchange rate. Consequently, this group is where we expect to find the most salient evidence of "Fear of Floating". To ensure data consistency and avoid the structural noise introduced by the COVID-19 pandemic, we focus our analysis on the 2010–2018 period, where data is most uniformly available.
+- **Floating** : Exchange rates are largely determined by the market, with no verifiable or predictable trend. Intervention in the foreign exchange market can be direct or indirect, and serves to moderate the pace of changes and prevent excessive fluctuations in the exchange rate. They may exhibit varying degrees of volatility, depending on the magnitude of the shocks affecting the economy.
+- **Free Floating** : Interventions are carried out only in exceptional cases to address market disruptions, and provided that the authorities have demonstrated that such interventions were limited to no more than three instances over the past six months, with each lasting no longer than three business days. 
+
+
+This dual-category approach is essential for distinguishing advanced economies, characterized by minimal intervention, from emerging markets, which may exhibit controlled volatility. The latter are dominated by emerging market economies (EMEs) such as Brazil, India, and Peru. While these countries officially allow the market to determine the exchange rate, they nevertheless reserve the right to intervene to mitigate exchange rate volatility.  It is therefore within this group that we expect to find the clearest evidence of *Fear of Floating*.  The exchange regime for each country is reported in @tbl-Exchange-Rates-Regime, leading us to study the 2010–2018 period, where data is most uniformly available.  
+
 
 ```{r}
 #| label: tbl-Exchange-Rates-Regime
@@ -175,6 +185,7 @@ table_display |>
   column_spec(4, width = "3cm")
 ```
 
+
 # Endogenizing the Variability Threshold
 
 ```{r}
@@ -220,12 +231,12 @@ $$
 P(|\Delta e _{it}|<x)= 0.60
 $$ {#eq-Prob}
 
-Where $e_{it}$ represents the exchange rate of country $i$ against the USD at time $t$. We apply this method to two of the original currencies, the Japanese Yen (JPY) and the Australian Dollar (AUD). We substituted the German Deutsche Mark with the Euro (EUR) and incorporated the British Pound (GBP), which is widely considered a robust free-floating currency. Daily data from Yahoo Finance were aggregated into monthly iterations using the end-of-period value. The use of end-of-period values is preferred over monthly averages to ensure that the exchange rate reflects a market spot price at a specific point in time, rather than a smoothed aggregate. This choice is methodologically consistent with the framework used in Calvo and Reinhart (2002), which evaluates the variability of "stock" variables. By using EOP data, the relative variations $\Delta_{e_{it}}$ in @eq-Variations represent the actual price movement between two discrete points, capturing the full extent of market shocks that occur at the end of the month which might otherwise be masked by the arithmetic mean of a period average. To compute the variations, we follow the framework of the original work by using the absolute value of monthly changes:
+Where $e_{it}$ represents the exchange rate of country $i$ against the USD at time $t$. We apply this method to two of the original currencies, the Japanese Yen (JPY) and the Australian Dollar (AUD). We substituted the German Deutsche Mark with the Euro (EUR) and incorporated the British Pound (GBP), which is widely considered a robust free-floating currency. Daily data from Yahoo Finance were aggregated into monthly iterations using the end-of-period value. The use of end-of-period values is preferred over monthly averages to ensure that the exchange rate reflects a market spot price at a specific point in time, rather than a smoothed aggregate. This choice is methodologically consistent with the framework used in Calvo and Reinhart (2002), which evaluates the variability of "stock" variables. By using EOP data, the relative variations $\Delta e_{it}$ in @eq-Variations represent the actual price movement between two discrete points, capturing the full extent of market shocks that occur at the end of the month which might otherwise be masked by the arithmetic mean of a period average. To compute the variations, we follow the framework of the original work by using the absolute value of monthly changes:
 $$
-\Delta_{e_{it}} = \frac{e_{it} - e_{it-1}}{e_{it-1}} \cdot 100
+\Delta e_{it} = \frac{e_{it} - e_{it-1}}{e_{it-1}} \cdot 100
 $$ {#eq-Variations}
 
-This metric captures the discrete relative variation of the exchange rate, serving as a proxy for financial stress. Higher percentage changes reflect increased exchange rate variability. While volatility is statistically measured as the dispersion of returns over time, $\Delta_{e_{it}}$ serve as a direct proxy for financial stress. By focusing on the magnitude of these discrete movements, we can identify episodes where the exchange rate deviates significantly from its previous level, signaling potential market instability. Furthermore, by focusing on relative rather than absolute changes, this measure ensures comparability across different currency pairs regardless of their nominal price levels. After using our method and using the 60% probability as a first estimate, we obtain a 2.13% threshold and represented it for our benchmark on @fig-Benchmark-variation.
+This metric captures the discrete relative variation of the exchange rate, serving as a proxy for financial stress. Higher percentage changes reflect increased exchange rate variability. While volatility is statistically measured as the dispersion of returns over time, $\Delta e_{{it}}$ serves as a direct proxy for financial stress. By focusing on the magnitude of these discrete movements, we can identify episodes where the exchange rate deviates significantly from its previous level, signaling potential market instability. Furthermore, by focusing on relative rather than absolute changes, this measure ensures comparability across different currency pairs regardless of their nominal price levels. After using our method and using the 60% probability as a first estimate, we obtain a 2.13% threshold and represented it for our benchmark on @fig-Benchmark-variation.
 
 ```{r}
 #| label: fig-Benchmark-variation
@@ -362,9 +373,9 @@ Benchmark_stability_multi <- Benchmark_df |>
   arrange(desc(p_60))
 ```
 
-We apply our baseline threshold of 2.13% to the Emerging Market Economies (EMEs). The graphical representations for both floaters and free floaters, provided in the [Appendix](#sec-one), reveal highly heterogeneous patterns of variation. The core objective of this analysis is to compute the probability of each EME remaining within this 2.13% band to allow for a direct comparison with the original findings of Calvo and Reinhart (2002).The selection of the 55% and 65% quantiles provides a symmetrical ±5% interval around our primary 60% baseline, allowing for a rigorous sensitivity test of the results. This approach establishes a variability gradient that captures the persistence of stability patterns across varying degrees of strictness. While the 55% quantile (1.80%) imposes a highly restrictive definition to test the most intense instances of currency management, the 65% quantile (2.33%) ensures the findings remain consistent as the threshold approaches the historical 2.50% mark. By demonstrating that the divergence between Benchmarks and Floaters holds across this range, we confirm that our observations reflect a structural policy stance rather than a specific artifact of the primary threshold. Finally, we include the original 2.5% band as a historical reference. Our results are detailed in @tbl-Probability-calcul. 
+We apply our baseline threshold of 2.13% to the Emerging Market Economies (EMEs). The graphical representations for both floaters and free floaters, provided in the [Appendix](#sec-one), reveal highly heterogeneous patterns of variation. The core objective of this analysis is to compute the probability of each EME remaining within this 2.13% band to allow for a direct comparison with the original findings of Calvo and Reinhart (2002).The selection of the 55% and 65% quantiles provides a symmetrical ±5% interval around our primary 60% baseline, allowing for a rigorous sensitivity test of the results. This approach establishes a variability gradient that captures the persistence of stability patterns across varying degrees of strictness. While the 55% quantile (1.80%) imposes a highly restrictive definition to test the most intense instances of currency management, the 65% quantile (2.33%) ensures the findings remain consistent as the threshold approaches the historical 2.50% mark. While the persistent divergence between Benchmarks and Floaters across these intervals suggests a deliberate stabilization effort, this statistical alignment remains a proxy for policy intent rather than a formal confirmation of active intervention, as it does not explicitly control for foreign exchange reserve movements or interest rate adjustments. Finally, we include the original 2.5% band as a historical reference. Our results are detailed in @tbl-Probability-calcul. 
 
-Our findings indicate that Free Floaters maintain results largely consistent with the Benchmark group across all specifications. However, they systematically display lower average variability, suggesting a latent tendency toward exchange rate management despite their official status. In contrast, the Floaters group exhibits significant heterogeneity. Such dispersion is expected, as country-specific factors heavily influence individual exchange rate dynamics. On one hand, the 'Rigid Anchor' profile (Kenya, Philippines) maintains stability levels that surpass even the most stable Benchmarks, hinting at a structural *Fear of Floating*. On the other hand, the 'Progressive Flexibility' profile (Mexico, Chile) demonstrates that certain EMEs have successfully integrated exchange rate variability as a functional economic tool. This divergence suggests that the decision to manage a currency is less about the official regime and more about specific domestic vulnerabilities, such as high pass-through to inflation or external debt levels.
+Our findings reveal that certain Free Floaters, such as Indonesia, exhibit stability levels that deviate significantly from the Benchmark group, suggesting that de facto exchange rate management may occur even under official free-floating mandates. In contrast, the Floaters group exhibits significant heterogeneity. Such dispersion is expected, as country-specific factors heavily influence individual exchange rate dynamics. On one hand, the 'Rigid Anchor' profile (Kenya, Philippines) maintains stability levels that surpass even the most stable Benchmarks, hinting at a structural *Fear of Floating*. On the other hand, the 'Progressive Flexibility' profile (Mexico, Chile) demonstrates that certain EMEs have successfully integrated exchange rate variability as a functional economic tool. This divergence suggests that the decision to manage a currency is driven by a combination of domestic structural vulnerabilities (such as debt-dollarization) and the necessity to prevent potential adverse effects of the Global Financial Cycle, although a definitive causal link would require integrating data on central bank interventions and inflationary pass-through.
 
 
 ```{r}
@@ -440,19 +451,20 @@ tab_final |>
             indent = FALSE, bold = TRUE) |>
   add_header_above(c(" " = 1, "Probability that the monthly change is:" = 4), bold = TRUE) |>
   footnote(
-  general = "Note: Data 2010-2019. Thresholds are endogenously determined. 2.50% is the Calvo-Reinhart (2002) reference.",
+  general = "Note: Data 2010-2018. Thresholds are endogenously determined. 2.50% is the Calvo-Reinhart (2002) reference.",
   general_title = "",
   footnote_as_chunk = TRUE,
   threeparttable = TRUE
 )
 ```
 
+To address the potential sensitivity of the results to the 60% probability benchmark, we conduct a sensitivity analysis by varying the volatility quantiles. By testing on our restrictive 55% quantile and the broader 65% quantile, we observe whether the identified patterns of currency stability persist across different definitions of flexibility. The data in @tbl-Probability-calcul suggests that the relative positioning of EMEs remains largely consistent across these intervals. "Rigid Anchors" like Kenya and the Philippines consistently display high stability probabilities, often exceeding 75% even at the most restrictive 1.80% threshold, which remains notably higher than the Benchmark group. Conversely, "Progressive Flexibles" such as Mexico and Chile exhibit a volatility profile that aligns more closely with the behavior of free floaters. This consistency across varying thresholds suggests that these observations may capture underlying policy smoothing or structural management rather than merely reflecting the specific choice of the 2.13% exogenous parameter.
 
 # Revisiting the Trilemma through the Global Financial Cycle
 
-The empirical results must be interpreted within the evolving framework of international macroeconomics. While the classical Impossible Trinity of @mundell1963capital suggests that flexible exchange rates grant monetary independence under free capital movement, recent literature on the Global Financial Cycle challenges this view. @rey2015dilemma argues that the international system faces a dilemma rather than a trilemma, as exchange rate flexibility fails to provide autonomy when global credit conditions and capital flows are driven by a single global factor. Closely tied to the US monetary policy stance and global risk aversion, this factor creates a significant constraint for EMEs. As @miranda2020us demonstrates, the US dollar acts as the primary engine for this cycle, exposing even floating regimes to imported volatility regardless of their domestic fundamentals. 
+The empirical results must be interpreted within the evolving framework of international macroeconomics. While the classical Impossible Trinity of @mundell1963capital suggests that flexible exchange rates grant monetary independence under free capital movement, recent literature on the Global Financial Cycle challenges this view. @rey2015dilemma argues that the international system faces a dilemma rather than a trilemma, as exchange rate flexibility fails to provide autonomy when global credit conditions and capital flows are driven by a single global factor. Closely tied to the US monetary policy stance and global risk aversion, this factor creates a significant constraint for EMEs. As @miranda2020us demonstrated, the US dollar acts as the primary engine for this cycle, exposing even floating regimes to imported volatility regardless of their domestic fundamentals. 
 
-This theoretical shift provides the crucial context for the results in @tbl-Comp-calcul, which compares contemporary stability probabilities at the 2.5% threshold with the original findings of @calvo2002fear. The systematic decrease in stability across all groups confirms that the modern financial environment is inherently more volatile than in the early 2000s. While every category exhibits increased variability, the shift is most pronounced for currencies that transitioned to or maintained a free-floating regime. Conversely, countries moving toward managed arrangements experienced the least severe declines, reflecting deliberate policy efforts to dampen the fluctuations driven by this global cycle.
+This theoretical framework contextualizes the results in @tbl-Comp-calcul, which compares contemporary stability probabilities at the 2.5% threshold with the original findings of @calvo2002fear. The observed decrease in stability across most groups suggests that the modern financial environment may be more volatile than in the early 2000s. However, these results should be interpreted with caution due to the limited sample size in certain categories, such as the 'Become FF' group (N=2). While every category exhibits increased variability, the shift appears most pronounced for currencies that transitioned to free-floating regimes. Conversely, countries moving toward managed arrangements show more resilient stability levels, which may reflect policy efforts to dampen the fluctuations driven by the global financial cycle.
 
 ```{r}
 #| label: tbl-Comp-calcul
@@ -539,7 +551,7 @@ wrap_plots(FL_plots, ncol = 4) +
   plot_layout(guides = "collect") +
   plot_annotation(
     caption = "Threshold of 2.13% derived from the 60% quantile of observations\nSource: Yahoo Finance data aggregated by author",
-    theme = theme(plot.caption = element_text(size = 6))
+    theme = theme(plot.caption = element_text(size = 10))
   ) &
   theme(axis.title = element_blank())
 ```
@@ -551,8 +563,8 @@ wrap_plots(FL_plots, ncol = 4) +
 #| message: false
 #| warning: false
 #| fig-width: 10
-#| fig-height: 7
-#| out-width: "90%"
+#| fig-height: 8
+#| out-width: "70%"
 
 
 free_floaters <- c("USD_CAD", "USD_CLP", "USD_IDR", "USD_MXN", "USD_NOK", "USD_SEK")
@@ -564,15 +576,9 @@ wrap_plots(FF_plots, ncol = 2) +
     caption = "Threshold of 2.13% derived from the 60% quantile of observations
     Source: Yahoo Finance data aggregated by author",
     theme = theme(
-      plot.caption = element_text(size = 6)
+      plot.caption = element_text(size = 10)
     )
   )
 ```
 
 # Bibliography
-
-[^1]: Let us borrow here the wording used in @ahmed2022monetary, which is useful in both its simplicity and clarity.
-
-[^2]: An exchange rate is classified as floating if the rate is largely market-determined, without an ascertainable or announced path, but where the authorities may intervene to smooth fluctuations and prevent undue volatility.
-
-[^3]: An exchange rate is classified as free floating if the intervention occurs only exceptionally and aims to address systemic risks or disorderly market conditions.
