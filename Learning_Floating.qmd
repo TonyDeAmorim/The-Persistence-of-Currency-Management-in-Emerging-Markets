@@ -1,6 +1,6 @@
 ---
-title: "Learning to Float ? The Persistence of Currency Management in Emerging Markets"
-subtitle: "A Modern Perspective on Calvo and Reinhart (2002)"
+title: "Learning to Float? Currency Management in Emerging Markets Under the Global Financial Cycles"
+subtitle: "Revisiting Calvo and Reinhart (2002) through the 2010–2018 Era"
 author:
   - name: |
       Tony De Amorim \tabularnewline
@@ -10,7 +10,7 @@ author:
 date: last-modified
 date-format: "MMMM YYYY"
 abstract: |
-  This essay investigates the modern persistence of "Fear of Floating" in Emerging Countries. We aim at replicating the framework of Calvo and Reinhart (2002) and apply it to contemporary data while extending the original methodology. By endogenizing a new variability threshold of 2.13% based on current benchmark currencies, the study suggests that several EMEs continue to exhibit exchange rate stability patterns that diverge significantly from those of pure floaters. While not structured as a formal working paper, this essay employs graphical representations and concise analytical frameworks to render complex macroeconomic concepts accessible to a broader audience.
+  This essay investigates the de facto exchange rate rigidity in Emerging Market Economies (EMEs) during the post-2008 era (2010–2018). Revisiting the framework of Calvo and Reinhart (2002), we analyze currency management under the influence of the Global Financial Cycle, deliberately selecting a pre-pandemic window to isolate market dynamics from recent structural noise. Rather than relying on a static historical baseline, we calibrate a relative variability threshold of 2.13% based on the actual behavior of benchmark pure floaters during this specific decade. The findings illustrate an illusion of free floating: several EMEs continue to exhibit stability patterns that diverge significantly from true floaters, sometimes acting as "Rigid Anchors" to mitigate imported volatility. While not structured as a formal working paper, this essay employs graphical representations and concise analytical frameworks to render complex macroeconomic concepts accessible to a broader audience.
 keywords: [Fear of Floating, Exchange Rate Regimes, Global Financial Cycle, Emerging Markets]
 format:
   pdf:
@@ -114,71 +114,73 @@ Var_Plot_DEV <- function(df, name, tr) {
 # Introduction
 
 
-Consistent with the work of @calvo2002fear, this short essay examines whether Emerging Market Economies (EMEs) continue to demonstrate a "Fear of Floating" within a contemporary setting. Specifically, it analyzes the propensity of these nations to stabilize their exchange rates through *de facto* management to mitigate adverse macroeconomic consequences. Although this is not an official working paper, this essay uses visual representations and a concise analytical framework to present this relevant topic on an understandable basis.
+Consistent with the foundational work of @calvo2002fear, this short essay investigates the de facto exchange rate rigidity of Emerging Market Economies (EMEs) during the post-2008 era. Specifically, it analyzes the propensity of these nations to smooth their currency fluctuations to mitigate imported macroeconomic shocks, particularly those driven by the Global Financial Cycle. As demonstrated in recent literature, notably by @miranda2020us, the Global Financial Cycle acts as a single global factor—closely tied to U.S. monetary policy and global risk aversion—that drives international credit conditions and capital flows, significantly constraining the monetary autonomy of EMEs regardless of their official exchange rate regimes. Although this is not an official working paper, this essay uses visual representations and a concise analytical framework to present this complex macroeconomic phenomenon on an understandable basis.
 
-In the original literature, *Fear of Floating* is defined as a phenomenon where EMEs, despite officially adopting flexible exchange rate regimes, remain highly sensitive to currency fluctuations due to concerns regarding dollar-denominated debt and inflationary pressures. Given that the foundational research by @calvo2002fear predates the long-term structural shifts following the 2008 Global Financial Crisis, including the rise of the Global Financial Cycle and periods of extreme capital flow volatility, the persistence of such behavior in the subsequent decade remains a critical empirical question. By benchmarking a panel of EMEs against major free-floating currencies during the 2010-2018 period, this study replicates and extends the original methodology to compare declared exchange regimes against realized market volatility.
+In the original literature, *Fear of Floating* is defined as a phenomenon where EMEs, despite officially adopting flexible exchange rate regimes, remain highly sensitive to currency fluctuations due to concerns regarding dollar-denominated debt and inflationary pressures. Because the foundational research by @calvo2002fear predates the structural shifts that followed the 2008 crisis, the persistence of such an "illusion of free floating" under the intense pressures of the Global Financial Cycle remains a critical empirical question. By benchmarking a panel of EMEs against major free-floating currencies during the 2010-18 period, this study replicates and extends the original methodology to compare declared exchange regimes against realized market volatility.
 
 The structure of this essay is as follows: Section 2 details the identification of exchange rate regimes and the construction of the sample. Section 3 explains the methodology used to endogenize a modern variation threshold of 2.13%. Section 4 applies this framework to EMEs to evaluate the persistence of Fear of Floating relative to historical benchmarks. Finally, Section 5 contextualizes these findings within modern theoretical frameworks, such as the Global Financial Cycle, and offers concluding remarks.
 
 # Methodology and Sample Selection
 
-This section details the construction of the study sample, which was developed by cross-referencing the foundational country list from @calvo2002fear with the IMF’s Annual Report on Exchange Arrangements and Exchange Restrictions (@imf2024areaer) database. To capture a contemporary perspective and avoid the structural noise introduced by the COVID-19 pandemic, we selected economies that maintained a de facto classification of either "floating" or "free floating" during at least 8 years between 2008 and 2023. These precise exchange rate regimes are officially defined as such by the IMF :
+This section details the construction of the study sample, which was developed by cross-referencing the foundational country list from @calvo2002fear with the IMF’s Annual Report on Exchange Arrangements and Exchange Restrictions (@imf2024areaer) database. Rather than attempting a broad contemporary analysis that would be skewed by the unprecedented structural noise of the COVID-19 pandemic, we deliberately focus on the 2010–2018 window. This specific period serves as an ideal macroeconomic laboratory: it captures the post-2008 Global Financial Cycle at its peak, allowing us to observe the de facto exchange rate rigidity of emerging markets under a stabilized global environment, prior to the extreme volatility of the 2020s. To ensure robust observations within this era, we selected economies that maintained a stable classification of either "floating" or "free floating" during this timeframe. These precise exchange rate regimes are officially defined as such by the IMF:
 
 - **Floating** : Exchange rates are largely determined by the market, with no verifiable or predictable trend. Intervention in the foreign exchange market can be direct or indirect, and serves to moderate the pace of changes and prevent excessive fluctuations in the exchange rate. They may exhibit varying degrees of volatility, depending on the magnitude of the shocks affecting the economy.
 - **Free Floating** : Interventions are carried out only in exceptional cases to address market disruptions, and provided that the authorities have demonstrated that such interventions were limited to no more than three instances over the past six months, with each lasting no longer than three business days. 
 
-
-This dual-category approach is essential for distinguishing advanced economies, characterized by minimal intervention, from emerging markets, which may exhibit controlled volatility. The latter are dominated by emerging market economies (EMEs) such as Brazil, India, and Peru. While these countries officially allow the market to determine the exchange rate, they nevertheless reserve the right to intervene to mitigate exchange rate volatility.  It is therefore within this group that we expect to find the clearest evidence of *Fear of Floating*.  The exchange regime for each country is reported in @tbl-Exchange-Rates-Regime, leading us to study the 2010–2018 period, where data is most uniformly available.  
-
+This dual-category approach is essential for distinguishing advanced economies, characterized by minimal intervention, from emerging markets, which may exhibit controlled volatility. The latter are prominently represented by emerging market economies (EMEs) such as Brazil, India, and Peru. While these countries officially allow the market to determine the exchange rate, they nevertheless reserve the right to intervene to mitigate currency fluctuations. It is therefore within this group that we expect to observe the clearest evidence of de facto exchange rate rigidity and the illusion of free floating. The officially declared exchange regime for each country during our target window is reported in @tbl-Exchange-Rates-Regime. 
 
 ```{r}
 #| label: tbl-Exchange-Rates-Regime
-#| tbl-cap: "Period of floating for studied countries"
+#| tbl-cap: "Classification of exchange rate regimes"
 #| echo: false
 #| message: false
 #| warning: false
 
-exchange_regime <-
-  read_delim("Ressources/exchange_regime.csv",
-    delim = ";", escape_double = FALSE, trim_ws = TRUE
-  )
 
-exchange_regime <- bind_rows(
-  exchange_regime |>
-    select(Country = 1, Period = 2) |>
-    mutate(Regime = "Free Floating"),
-  exchange_regime |>
-    select(Country = 3, Period = 4) |>
-    mutate(Regime = "Floating")
-) |>
-  filter(!is.na(Country))
+exchange_regime_raw <- read_delim("Ressources/exchange_regime.csv", 
+                                  delim = ";", 
+                                  escape_double = FALSE, 
+                                  trim_ws = TRUE)
 
-n <- nrow(exchange_regime)
-mid <- ceiling(n / 2)
+free_floaters <- exchange_regime_raw |>
+  select(Free_Floating = 1) |>
+  filter(!is.na(Free_Floating))
 
-partie1 <- exchange_regime[1:mid, ]
-partie2 <- exchange_regime[(mid + 1):n, ]
+floaters <- exchange_regime_raw |>
+  select(Floating = 3) |>
+  filter(!is.na(Floating))
 
-if (nrow(partie2) < nrow(partie1)) {
-  partie2 <- bind_rows(partie2, tibble(Country = "", Period = "", Regime = ""))
+n_free <- nrow(free_floaters)
+n_float <- nrow(floaters)
+max_rows <- max(n_free, n_float)
+
+if (n_free < max_rows) {
+  free_floaters <- bind_rows(free_floaters, 
+                             tibble(Free_Floating = rep("", max_rows - n_free)))
 }
 
-table_display <- bind_cols(partie1, partie2)
+if (n_float < max_rows) {
+  floaters <- bind_rows(floaters, 
+                        tibble(Floating = rep("", max_rows - n_float)))
+}
+
+table_display <- bind_cols(free_floaters, floaters)
 
 table_display |>
   kable(
     format = "latex",
     booktabs = TRUE,
-    col.names = c("Country", "Period", "Regime", "Country", "Period", "Regime"),
+    col.names = c("Free Floating", "Floating"),
     align = "l"
   ) |>
   kable_styling(
     latex_options = c("hold_position"),
-    font_size = 8
+    font_size = 10
   ) |>
-  add_header_above(c(" " = 3, " " = 3), line = FALSE) |>
-  column_spec(3, width = "3cm") |>
-  column_spec(4, width = "3cm")
+  column_spec(1, width = "6cm") |>
+  column_spec(2, width = "6cm")
+
+
 ```
 
 
